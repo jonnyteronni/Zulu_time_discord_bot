@@ -75,7 +75,7 @@ def update_user_timezone(username, timezone):
 def insert_user_timezone(user, tz):
     # connect to SQL
     cnx = connect_to_db()
-    
+      
     try:
         cursor = cnx.cursor()
       
