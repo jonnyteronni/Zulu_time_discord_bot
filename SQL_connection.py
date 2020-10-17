@@ -8,6 +8,20 @@ Created on Thu Oct 15 14:07:47 2020
 import mysql.connector
 import pandas as pd
 
+# def create_sql_table(cnx):
+#     q_timezones = ("CREATE TABLE IF NOT EXISTS "
+#     "7zulu_user_timezones ("
+#     "id int NOT NULL AUTO_INCREMENT ,"
+#     "username varchar(100) NOT NULL,"
+#     "timezone` varchar(100) NOT NULL,"
+#     "date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+#     "PRIMARY KEY (`id`));")
+    
+#     cursor = cnx.cursor()
+    
+#     cursor.execute(q_timezones)
+
+
 
 def connect_to_db():
     #Creating timeseries to export to sql
@@ -31,7 +45,15 @@ def connect_to_db():
     except print("Connection is not successfully open"):
         pass
     
+    # create_sql_table(cnx)
+    
     return cnx
+
+
+
+
+
+
 
 def connect_to_timezones_table():
     
@@ -47,7 +69,7 @@ def connect_to_timezones_table():
     except print("Connection to table is not working"):
         pass
 
-    timezones_df=pd.DataFrame(results,columns=["id","username","timezone","date"])
+    timezones_df=pd.DataFrame(results,columns=["id","username","timezone","date","steamid64","whitelist_id"])
     
     close_sql(cursor,cnx)
     
@@ -70,7 +92,27 @@ def update_user_timezone(username, timezone):
         pass
     
     close_sql(cursor,cnx)
+
+
+def update_user_steamid(username, steamid):
+    # connect to SQL
+    cnx = connect_to_db()
     
+    try:
+        cursor = cnx.cursor()
+        query = (f"UPDATE 7zulu_database.7zulu_user_timezones SET steamid64 = '{steamid}', whitelist_id = 'Admin={steamid}:whitelist // {username}' WHERE username = '{username}';")
+        cursor.execute(query)
+        cnx.commit()
+        
+        print("Updated record on table")
+        
+    except print("Updating table not working"):
+        pass
+    
+    close_sql(cursor,cnx)
+
+
+
     
 def insert_user_timezone(user, tz):
     # connect to SQL
@@ -91,7 +133,28 @@ def insert_user_timezone(user, tz):
     
     
     close_sql(cursor,cnx)
+
+def insert_user_steamid(user, steamid):
+    # connect to SQL
+    cnx = connect_to_db()
+      
+    try:
+        cursor = cnx.cursor()
+      
+        query = ("INSERT INTO 7zulu_database.7zulu_user_timezones (username,steamid64,whitelist_id) VALUES ({},{},{});".format("'" + user + "'","'" + str(steamid) + "'","'Admin=" + str(steamid) + ":whitelist //" + user + "'"))
+        
+        cursor.execute(query)
+        cnx.commit()
+        
+        print("Inserted new record on table") 
+        
+    except print("Insert new record on table not working"):
+        pass
     
+    
+    close_sql(cursor,cnx)
+
+
 def close_sql(cursor,cnx):
     cursor.close()
     cnx.close()

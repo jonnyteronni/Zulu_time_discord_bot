@@ -164,18 +164,55 @@ async def on_message(message):
         await message.channel.send(final_msg)
         
 
-
+ # discord command for register user timezone on database
+    if message.content.startswith('!regsteamid'):
+        
+        # exclude command from the message
+        msg = str(message.content)
+        msg = msg.split()
+        msg = " ".join(msg[1:])
+        
+        # define user timezone
+        steamid = msg
+        
+        # check if steamid is a number
+        try:
+            steamid = int(steamid)
+            
+        except:
+            await message.channel.send('Steamid provided is not a number.')
+            return
+        
+        # gets info from DB into a dataframe
+        timezones_df = SQL_cnx.connect_to_timezones_table()
+        
+        
+        # checks if username already exists on DB
+        if message.author.name in timezones_df['username'].values:
+            
+            # changes steamid on DB for username
+            SQL_cnx.update_user_steamid(message.author.name,steamid)
+            
+            await message.channel.send('Steamid defined for {}.'.format(message.author.name))
+        
+        
+        # insert new user on DB if he does not exist yet
+        else:
+            
+            SQL_cnx.insert_user_steamid(message.author.name,steamid)    
+        
+            await message.channel.send('Steamid defined as {}.'.format(message.author.name))
 
 
 
 
 
         
-    # Delete default help command
-    client.remove_command('help') #Embeded help with list and details of commands
+
+    
     
     # discord command to show a help object describing all bot commands
-    if message.content.startswith('!help'):
+    if message.content.startswith('!assist'):
         
         # create discord object
         embed = discord.Embed(
@@ -187,6 +224,8 @@ async def on_message(message):
         embed.add_field(name='!timezones', value='Get list of all timezones to choose from.', inline=False)
         embed.add_field(name='!checktimezone', value='Check your timezone registered on bot.', inline=False)
         embed.add_field(name='!zulutime', value='Check zulu and your local time.', inline=False)
+        embed.add_field(name='!regsteamid', value='Register your steamid64.', inline=False)
+        embed.add_field(name='Developed by', value='7Z - JonnyTeronni', inline=False)
         
         await message.channel.send(embed=embed)
   
@@ -194,4 +233,4 @@ async def on_message(message):
 
 
   
-client.run('Token here')
+client.run('NzYzNzU5ODgzOTI5Mzg3MDE4.X38Y0g.FM1tlYF0K90rBw2mfTYPCFGgS5U')
